@@ -170,7 +170,7 @@ export function renderScanResults(data, container) {
             <tbody>
               ${engineResults.map(e => `
                 <tr>
-                  <td style="font-weight: 600;">${escapeHtml(e.engine_name)}</td>
+                  <td style="font-weight: 600;">${escapeHtml(e.engine_name || e.engine || 'Analysis Engine')}</td>
                   <td><span class="badge ${getEngineStatusClass(e.status)}">${escapeHtml(e.status)}</span></td>
                   <td style="font-family: var(--font-mono); font-size: 0.8rem;">${e.duration_ms ? `${e.duration_ms}ms` : '—'}</td>
                   <td style="color: var(--text-secondary); font-size: 0.85rem;">${escapeHtml(e.summary || 'Completed without anomalies')}</td>

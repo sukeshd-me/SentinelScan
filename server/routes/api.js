@@ -171,10 +171,21 @@ router.get('/scans/:id', (req, res) => {
       fileDeleted: Boolean(scan.file_deleted)
     },
     findings,
-    engineResults: engineResults.map(e => ({
-      ...e,
-      details: e.details ? JSON.parse(e.details) : null
-    }))
+    engineResults: engineResults.map(e => {
+      let details = null;
+      if (e.details && typeof e.details === 'object') {
+        details = e.details;
+      } else if (typeof e.details === 'string') {
+        try { details = JSON.parse(e.details); } catch { details = e.details; }
+      } else if (e.details_json && typeof e.details_json === 'string') {
+        try { details = JSON.parse(e.details_json); } catch { details = e.details_json; }
+      }
+      return {
+        ...e,
+        engine_name: e.engine_name || e.engine,
+        details
+      };
+    })
   });
 });
 
