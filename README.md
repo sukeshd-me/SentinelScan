@@ -262,7 +262,7 @@ For files too large for standard single-request HTTP forms (up to 1,024 MB):
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/sukeshd007/SentinelScan.git
+git clone https://github.com/<your-username>/SentinelScan.git
 cd SentinelScan
 
 # 2. Install dependencies
