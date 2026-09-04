@@ -1,0 +1,28 @@
+{
+  "name": "sentinelscan",
+  "version": "1.0.0",
+  "description": "SentinelScan — File Safety & Malware Analysis Platform. Real open-source static analysis and defensive cybersecurity platform.",
+  "main": "server/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js",
+    "test": "node --test --test-concurrency=1 tests/**/*.test.js"
+  },
+  "keywords": [
+    "cybersecurity",
+    "malware-analysis",
+    "static-analysis",
+    "clamav",
+    "file-security",
+    "anti-malware",
+    "security-scanner"
+  ],
+  "author": "Sukesh D",
+  "license": "MIT",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.758.0",
+    "express": "^4.21.2",
+    "multer": "^2.3.0"
+  }
+}

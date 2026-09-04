@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SentinelScan — File Safety & Malware Analysis Platform</title>
+  <meta name="description" content="SentinelScan is an open-source, defensive cybersecurity web application providing safe static analysis, ClamAV antivirus inspection, and deterministic threat scoring with a zero-execution guarantee.">
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2306b6d4'><path d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'/></svg>">
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <a href="#" class="brand" data-switch-view="view-dashboard">
+        <div class="brand-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <polyline points="9 12 11 14 15 10"/>
+          </svg>
+        </div>
+        <div>
+          <span>SentinelScan</span>
+          <span class="brand-badge">Defensive Ops</span>
+        </div>
+      </a>
+
+      <nav>
+        <ul class="nav-links">
+          <li><button class="nav-btn active" data-view="view-dashboard">Dashboard</button></li>
+          <li><button class="nav-btn" data-view="view-scanner">Scanner</button></li>
+          <li><button class="nav-btn" data-view="view-history">Scan History</button></li>
+          <li><button class="nav-btn" data-view="view-findings">Threat Matrix</button></li>
+          <li><button class="nav-btn" data-view="view-reports">Reports</button></li>
+          <li><button class="nav-btn" data-view="view-api">API Docs</button></li>
+          <li><button class="nav-btn" data-view="view-security">Security Center</button></li>
+          <li><button class="nav-btn" data-view="view-status">System Status</button></li>
+          <li><button class="nav-btn" data-view="view-settings">Settings</button></li>
+          <li><button class="nav-btn" data-view="view-about">About</button></li>
+        </ul>
+      </nav>
+
+      <div class="header-status">
+        <div class="status-pill">
+          <span class="status-dot" id="headerStatusDot"></span>
+          <span id="headerStatusText">Connecting...</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main View Container -->
+  <main class="main-layout">
+
+    <!-- 1. DASHBOARD VIEW -->
+    <section class="view-section active" id="view-dashboard">
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">Total Files Analyzed</div>
+          <div class="stat-val" id="dashTotalScans">0</div>
+          <div class="stat-meta">Zero-execution static pipeline</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Clean Verdicts</div>
+          <div class="stat-val" id="dashCleanScans" style="color: var(--sev-clean);">0</div>
+          <div class="stat-meta">No suspicious indicators</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Threats & Anomalies</div>
+          <div class="stat-val" id="dashThreatScans" style="color: var(--sev-high);">0</div>
+          <div class="stat-meta">Flagged by static parsers or AV</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Active Payloads</div>
+          <div class="stat-val" id="dashActiveFiles" style="color: var(--cyber-cyan);">0</div>
+          <div class="stat-meta">5-minute automatic shredding active</div>
+        </div>
+      </div>
+
+      <!-- Quick Action / Drop CTA -->
+      <div class="cyber-card" style="margin-bottom: 2rem; background: linear-gradient(135deg, rgba(14, 165, 233, 0.1), rgba(15, 21, 35, 0.8)); border-color: rgba(6, 182, 212, 0.3);">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1.5rem;">
+          <div>
+            <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem;">Ready to Analyze a Suspicious File?</h2>
+            <p style="color: var(--text-secondary); max-width: 650px;">
+              SentinelScan safely dissects Portable Executables, ELF binaries, PDF documents, Office macros, Android APKs, and archives up to 1 GB without ever executing code in process memory.
+            </p>
+          </div>
+          <button class="btn btn-primary" data-switch-view="view-scanner" style="padding: 0.8rem 1.75rem; font-size: 1rem;">
+            Launch Scanner
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Safe Sample Testing -->
+      <div class="cyber-card" style="margin-bottom: 2rem;">
+        <div class="card-header">
+          <h3 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            Instant Defensive Test Samples (Safe Synthetic Payloads)
+          </h3>
+          <span class="badge badge-LOW">Zero Danger</span>
+        </div>
+        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.25rem;">
+          Test SentinelScan's static detection modules immediately using safe synthetic samples generated directly in your browser:
+        </p>
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+          <button class="btn btn-secondary btn-sm" data-sample="eicar">
+            <span>🛡️</span> EICAR Antivirus Test
+          </button>
+          <button class="btn btn-secondary btn-sm" data-sample="powershell">
+            <span>⚡</span> Suspicious Script (IEX/DownloadString)
+          </button>
+          <button class="btn btn-secondary btn-sm" data-sample="pdf_active">
+            <span>📄</span> PDF with Embedded JavaScript
+          </button>
+          <button class="btn btn-secondary btn-sm" data-sample="zipbomb">
+            <span>📦</span> High-Expansion Zip Pattern
+          </button>
+        </div>
+      </div>
+
+      <!-- Recent Scan Activity -->
+      <div class="cyber-card">
+        <div class="card-header">
+          <h3 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Recent Threat Intelligence Feeds
+          </h3>
+          <button class="btn btn-secondary btn-sm" data-switch-view="view-history">View All History</button>
+        </div>
+        <div class="data-table-wrapper">
+          <table class="cyber-table">
+            <thead>
+              <tr>
+                <th>Target File</th>
+                <th>Verdict</th>
+                <th>SHA-256 Hash</th>
+                <th>Telemetry Action</th>
+              </tr>
+            </thead>
+            <tbody id="dashRecentTable">
+              <tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 2rem;">Loading feeds...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. SCANNER VIEW -->
+    <section class="view-section" id="view-scanner">
+      <!-- Drag & Drop Zone -->
+      <div class="dropzone-container" id="dropzone">
+        <input type="file" id="fileInput" style="display: none;" />
+        <div class="dropzone-icon">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+            <polyline points="17 8 12 3 7 8"/>
+            <line x1="12" y1="3" x2="12" y2="15"/>
+          </svg>
+        </div>
+        <h2 class="dropzone-title">Drop Suspicious File to Dissect</h2>
+        <p class="dropzone-desc">
+          Upload any binary, document, archive, or script up to <strong>1.0 GB</strong>. Streamed via chunked transfer, inspected using zero-execution static parsers and ClamAV.
+        </p>
+        <button class="btn btn-primary" onclick="document.getElementById('fileInput').click()" type="button">
+          Browse Local Files
+        </button>
+
+        <div class="dropzone-features">
+          <div class="feature-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Zero-Execution Sandbox
+          </div>
+          <div class="feature-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            SHA-256 / SHA-1 / MD5
+          </div>
+          <div class="feature-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Section Entropy & W^X
+          </div>
+          <div class="feature-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            5-Min Secure Auto-Delete
+          </div>
+        </div>
+      </div>
+
+      <!-- Upload Telemetry & Progress Panel -->
+      <div class="telemetry-panel" id="uploadTelemetry">
+        <div class="telemetry-header">
+          <div>
+            <strong style="font-size: 1rem; color: var(--cyber-cyan);">Streaming Binary Payload</strong>
+            <div style="font-size: 0.8rem; color: var(--text-secondary);" id="currentStageMessage">Preparing transfer stream...</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <span style="font-family: var(--font-mono); font-size: 1.25rem; font-weight: 700; color: var(--cyber-cyan);" id="progressPercent">0%</span>
+            <button class="btn btn-secondary btn-sm" id="btnCancelUpload">Cancel</button>
+          </div>
+        </div>
+
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progressBarFill"></div>
+        </div>
+
+        <div class="telemetry-metrics">
+          <div class="metric-item">
+            <span class="metric-title">Transfer Speed</span>
+            <span class="metric-value" id="uploadSpeed">0.0 MB/s</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-title">Transferred</span>
+            <span class="metric-value" id="uploadBytes">0 / 0 MB</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-title">Estimated Time</span>
+            <span class="metric-value" id="uploadEta">—</span>
+          </div>
+          <div class="metric-item">
+            <span class="metric-title">Chunk Index</span>
+            <span class="metric-value" id="uploadChunks">0 / 0</span>
+          </div>
+        </div>
+
+        <!-- Stage Stepper -->
+        <div class="scan-stages">
+          <div class="scan-stage-item" id="stage-1">
+            <div class="stage-bullet">1</div>
+            <div>Chunked Upload</div>
+          </div>
+          <div class="scan-stage-item" id="stage-2">
+            <div class="stage-bullet">2</div>
+            <div>Streaming Hashes</div>
+          </div>
+          <div class="scan-stage-item" id="stage-3">
+            <div class="stage-bullet">3</div>
+            <div>Static & AV Parsing</div>
+          </div>
+          <div class="scan-stage-item" id="stage-4">
+            <div class="stage-bullet">4</div>
+            <div>Risk Scoring</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results Display Container -->
+      <div id="scanResultsContainer" style="margin-top: 2rem;"></div>
+    </section>
+
+    <!-- 3. SCAN HISTORY VIEW -->
+    <section class="view-section" id="view-history">
+      <div id="historyContainer"></div>
+    </section>
+
+    <!-- 4. THREAT MATRIX VIEW -->
+    <section class="view-section" id="view-findings">
+      <div class="cyber-card" style="margin-bottom: 2rem;">
+        <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--cyber-cyan);">Defensive Threat Matrix & Scoring System</h2>
+        <p style="color: var(--text-secondary); max-width: 800px; margin-bottom: 1.5rem;">
+          SentinelScan replaces guesswork and black-box AI with <strong>deterministic, evidence-based threat assessment</strong>. Every point assigned to a file is backed by physical binary or structural indicators.
+        </p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.25rem;">
+          <div style="background: var(--bg-secondary); border: 1px solid var(--border-subtle); padding: 1.25rem; border-radius: var(--radius-md);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <strong style="color: var(--sev-critical);">Known Malware Signature</strong>
+              <span class="badge badge-CRITICAL">+85 Pts</span>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-secondary);">
+              ClamAV signature match confirming known virus, trojan, ransomware, or cryptominer pattern.
+            </p>
+          </div>
+
+          <div style="background: var(--bg-secondary); border: 1px solid var(--border-subtle); padding: 1.25rem; border-radius: var(--radius-md);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <strong style="color: var(--sev-critical);">Decompression Bomb</strong>
+              <span class="badge badge-CRITICAL">+80 Pts</span>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-secondary);">
+              Archive with abnormal compression ratio (>100:1) or total expansion size exceeding 1 GB designed for resource starvation.
+            </p>
+          </div>
+
+          <div style="background: var(--bg-secondary); border: 1px solid var(--border-subtle); padding: 1.25rem; border-radius: var(--radius-md);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <strong style="color: var(--sev-critical);">Zip Slip / Traversal</strong>
+              <span class="badge badge-CRITICAL">+75 Pts</span>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-secondary);">
+              Archive entries containing ../ sequences or absolute filesystem paths designed to escape destination extraction directories.
+            </p>
+          </div>
+
+          <div style="background: var(--bg-secondary); border: 1px solid var(--border-subtle); padding: 1.25rem; border-radius: var(--radius-md);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <strong style="color: var(--sev-high);">Disguised Executable</strong>
+              <span class="badge badge-HIGH">+65 Pts</span>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-secondary);">
+              Severe extension spoofing: executable binary header (MZ/PE or ELF) disguised with image or document extension (.pdf, .jpg, .png).
+            </p>
+          </div>
+
+          <div style="background: var(--bg-secondary); border: 1px solid var(--border-subtle); padding: 1.25rem; border-radius: var(--radius-md);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <strong style="color: var(--sev-high);">Remote Template Injection</strong>
+              <span class="badge badge-HIGH">+65 Pts</span>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-secondary);">
+              Office document configured with external relationship targets fetching remote weaponized templates via HTTP upon opening.
+            </p>
+          </div>
+
+          <div style="background: var(--bg-secondary); border: 1px solid var(--border-subtle); padding: 1.25rem; border-radius: var(--radius-md);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <strong style="color: var(--sev-high);">PDF /Launch Action</strong>
+              <span class="badge badge-HIGH">+60 Pts</span>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-secondary);">
+              PDF document configured with automatic application launch directives triggering system process execution.
+            </p>
+          </div>
+
+          <div style="background: var(--bg-secondary); border: 1px solid var(--border-subtle); padding: 1.25rem; border-radius: var(--radius-md);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <strong style="color: var(--sev-moderate);">W^X Memory Invariant Violation</strong>
+              <span class="badge badge-MEDIUM">+45 Pts</span>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-secondary);">
+              PE or ELF section marked both Writable and Executable (IMAGE_SCN_MEM_WRITE | IMAGE_SCN_MEM_EXECUTE), indicating self-modifying code or stagers.
+            </p>
+          </div>
+
+          <div style="background: var(--bg-secondary); border: 1px solid var(--border-subtle); padding: 1.25rem; border-radius: var(--radius-md);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+              <strong style="color: var(--sev-moderate);">High Section Entropy (> 7.2)</strong>
+              <span class="badge badge-MEDIUM">+30 Pts</span>
+            </div>
+            <p style="font-size: 0.85rem; color: var(--text-secondary);">
+              Shannon entropy calculation indicating encrypted payloads, packed stubs (UPX), or hidden binary data.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. REPORTS CENTER -->
+    <section class="view-section" id="view-reports">
+      <div class="cyber-card">
+        <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--cyber-cyan);">Security Reports & Audit Export Center</h2>
+        <p style="color: var(--text-secondary); max-width: 750px; margin-bottom: 2rem;">
+          SentinelScan produces standardized, audit-ready security reports designed for Incident Response (IR) teams, SOC analysts, and compliance documentation.
+        </p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+          <div class="stat-card">
+            <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem;">JSON Machine Telemetry</h3>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+              Structured data payload containing full cryptographic checksums, individual engine execution timings, raw evidence strings, confidence scores, and limitations.
+            </p>
+            <div style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--cyber-cyan);">GET /api/scans/:id/report?format=json</div>
+          </div>
+
+          <div class="stat-card">
+            <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem;">Markdown Audit Brief</h3>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+              Human-readable executive summary formatted in GitHub-flavored Markdown. Ready to paste directly into GitHub issues, Jira tickets, or incident logs.
+            </p>
+            <div style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--cyber-cyan);">GET /api/scans/:id/report?format=markdown</div>
+          </div>
+
+          <div class="stat-card">
+            <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem;">Print-Ready PDF Preview</h3>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 1rem;">
+              Clean, printer-friendly CSS stylesheet formatting that allows browser Print-to-PDF export with full company and timestamp headers.
+            </p>
+            <div style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--cyber-cyan);">window.print() from Scanner view</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. REST API DOCUMENTATION -->
+    <section class="view-section" id="view-api">
+      <div class="cyber-card">
+        <div class="card-header">
+          <h2 style="font-size: 1.5rem; font-weight: 800; color: var(--cyber-cyan);">SentinelScan REST API Reference</h2>
+          <span class="badge badge-CLEAN">v1.0.0 Active</span>
+        </div>
+        <p style="color: var(--text-secondary); max-width: 800px; margin-bottom: 2rem;">
+          Integrate SentinelScan directly into CI/CD pipelines, SIEM ingest workflows, or custom threat hunting scripts.
+        </p>
+
+        <!-- Endpoint 1 -->
+        <div style="margin-bottom: 2rem; background: var(--bg-secondary); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+          <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+            <span class="badge badge-CLEAN">POST</span>
+            <code style="font-family: var(--font-mono); font-size: 1rem;">/api/scans/init</code>
+            <span style="color: var(--text-muted); font-size: 0.85rem;">Initialize 1GB Chunked Upload</span>
+          </div>
+          <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.75rem;">
+            Request Body: <code>{ "filename": "sample.bin", "fileSize": 104857600, "clientToken": "ct_secret" }</code>
+          </p>
+          <div class="evidence-box">curl -X POST http://localhost:3000/api/scans/init \
+  -H "Content-Type: application/json" \
+  -d '{"filename":"sample.exe","fileSize":52428800,"clientToken":"my_token"}'</div>
+        </div>
+
+        <!-- Endpoint 2 -->
+        <div style="margin-bottom: 2rem; background: var(--bg-secondary); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+          <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+            <span class="badge badge-CLEAN">POST</span>
+            <code style="font-family: var(--font-mono); font-size: 1rem;">/api/scans/:id/chunk</code>
+            <span style="color: var(--text-muted); font-size: 0.85rem;">Stream 5MB Binary Chunk</span>
+          </div>
+          <div class="evidence-box">curl -X POST http://localhost:3000/api/scans/&lt;SCAN_ID&gt;/chunk \
+  -H "Content-Type: application/octet-stream" \
+  -H "x-chunk-index: 0" \
+  -H "x-client-token: my_token" \
+  --data-binary "@chunk_000.bin"</div>
+        </div>
+
+        <!-- Endpoint 3 -->
+        <div style="margin-bottom: 2rem; background: var(--bg-secondary); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+          <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+            <span class="badge badge-CLEAN">POST</span>
+            <code style="font-family: var(--font-mono); font-size: 1rem;">/api/scans/direct</code>
+            <span style="color: var(--text-muted); font-size: 0.85rem;">Direct Multipart Upload (&lt; 10MB)</span>
+          </div>
+          <div class="evidence-box">curl -X POST http://localhost:3000/api/scans/direct \
+  -F "file=@suspicious_payload.bin" \
+  -H "x-client-token: my_token"</div>
+        </div>
+
+        <!-- Endpoint 4 -->
+        <div style="margin-bottom: 2rem; background: var(--bg-secondary); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+          <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+            <span class="badge badge-LOW">GET</span>
+            <code style="font-family: var(--font-mono); font-size: 1rem;">/api/scans/:id</code>
+            <span style="color: var(--text-muted); font-size: 0.85rem;">Fetch Full Scan Findings & Verdict</span>
+          </div>
+          <div class="evidence-box">curl -X GET http://localhost:3000/api/scans/&lt;SCAN_ID&gt;</div>
+        </div>
+
+        <!-- Endpoint 5 -->
+        <div style="background: var(--bg-secondary); padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+          <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem;">
+            <span class="badge badge-CRITICAL">DELETE</span>
+            <code style="font-family: var(--font-mono); font-size: 1rem;">/api/scans/:id</code>
+            <span style="color: var(--text-muted); font-size: 0.85rem;">Permanent Immediate File Deletion</span>
+          </div>
+          <div class="evidence-box">curl -X DELETE http://localhost:3000/api/scans/&lt;SCAN_ID&gt; \
+  -H "x-client-token: my_token"</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. SECURITY CENTER -->
+    <section class="view-section" id="view-security">
+      <div class="cyber-card" style="margin-bottom: 2rem;">
+        <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--cyber-cyan);">Zero-Execution Architecture & Defense In Depth</h2>
+        <p style="color: var(--text-secondary); line-height: 1.7; margin-bottom: 1.5rem;">
+          Traditional malware sandboxes execute binaries inside virtual machines, risking hypervisor breakouts, anti-evasion sleeps, or accidental network beaconing. SentinelScan utilizes a <strong>Zero-Execution Static Dissection</strong> architecture.
+        </p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;">
+          <div class="stat-card">
+            <h3 style="font-size: 1.1rem; color: var(--sev-clean); margin-bottom: 0.5rem;">Read-Only Binary Inspection</h3>
+            <p style="font-size: 0.85rem; color: var(--text-secondary);">
+              Files are parsed strictly as passive byte streams. Headers, sections, symbols, and streams are dissected using pure mathematical calculations (Shannon entropy, struct unpacking) without launching child processes.
+            </p>
+          </div>
+
+          <div class="stat-card">
+            <h3 style="font-size: 1.1rem; color: var(--sev-clean); margin-bottom: 0.5rem;">Cryptographic Token Ownership</h3>
+            <p style="font-size: 0.85rem; color: var(--text-secondary);">
+              Each upload session is authenticated with a 128-bit cryptographic client token. Only the entity that submitted the file has authorization to trigger manual erasure or inspect non-public telemetry.
+            </p>
+          </div>
+
+          <div class="stat-card">
+            <h3 style="font-size: 1.1rem; color: var(--sev-clean); margin-bottom: 0.5rem;">Automated 5-Minute File Shredding</h3>
+            <p style="font-size: 0.85rem; color: var(--text-secondary);">
+              To prevent data hoarding and liability, all uploaded file payloads are automatically and permanently deleted from disk 5 minutes after analysis completion. Verification checks ensure zero residual traces.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. SYSTEM STATUS VIEW -->
+    <section class="view-section" id="view-status">
+      <div id="statusContainer"></div>
+    </section>
+
+    <!-- 9. SETTINGS VIEW -->
+    <section class="view-section" id="view-settings">
+      <div class="cyber-card" style="max-width: 700px;">
+        <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--cyber-cyan);">Client Authentication & Privacy Preferences</h2>
+        <p style="color: var(--text-secondary); font-size: 0.9rem; margin-bottom: 1.5rem;">
+          Your client token verifies your ownership of uploaded scans and allows immediate payload deletion.
+        </p>
+
+        <div style="margin-bottom: 1.5rem;">
+          <label style="display: block; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem;">Your Client Ownership Token</label>
+          <input type="text" id="settingClientToken" style="width: 100%; background: var(--bg-secondary); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 0.75rem 1rem; color: #fff; font-family: var(--font-mono); font-size: 0.9rem;" />
+        </div>
+
+        <div style="display: flex; gap: 0.75rem;">
+          <button class="btn btn-primary" id="btnSaveToken">Save Token</button>
+          <button class="btn btn-secondary" id="btnGenToken">Generate New Token</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10. ABOUT VIEW -->
+    <section class="view-section" id="view-about">
+      <div class="cyber-card" style="max-width: 800px;">
+        <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 0.5rem; color: var(--cyber-cyan);">About SentinelScan</h2>
+        <p style="color: var(--text-secondary); line-height: 1.7; margin-bottom: 1.5rem;">
+          <strong>SentinelScan</strong> is a real, open-source file safety and malware analysis platform built for defensive security engineers, malware researchers, and organizations needing safe, zero-cost, on-premise threat inspection.
+        </p>
+
+        <h3 style="font-size: 1.15rem; margin-bottom: 0.5rem;">Core Design Principles</h3>
+        <ul style="margin-left: 1.5rem; color: var(--text-secondary); font-size: 0.9rem; line-height: 1.8; margin-bottom: 1.5rem;">
+          <li><strong>Authentic Findings:</strong> Zero simulated outcomes or fake status indicators.</li>
+          <li><strong>Zero-Execution Guarantee:</strong> Files are dissected passively; never executed.</li>
+          <li><strong>1 GB Streamed Capacity:</strong> Chunked pipeline prevents memory exhaustion.</li>
+          <li><strong>Pluggable Storage:</strong> Works out of the box on local disk or with S3/B2 cloud storage.</li>
+          <li><strong>Free-First Architecture:</strong> Complete open-source stack using native Node.js 24 and SQLite.</li>
+        </ul>
+
+        <div class="notice-box">
+          <strong>Open Source License:</strong> Released under the permissive MIT License. Contributions and security disclosures are welcome.
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script type="module" src="/js/app.js"></script>
+</body>
+</html>

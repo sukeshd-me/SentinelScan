@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+
+# Environment and secrets
+.env
+*.pem
+*.key
+
+# Temporary files & uploaded scan files
+temp/
+uploads/
+*.tmp
+
+# SQLite databases & runtime storage
+data/
+*.sqlite
+*.sqlite-journal
+*.sqlite-wal
+*.sqlite-shm
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Log files
+logs/
+*.log
+npm-debug.log*
+
+# Test coverage & artifacts
+coverage/
+.nyc_output/
